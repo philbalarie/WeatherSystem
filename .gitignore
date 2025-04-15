@@ -1,0 +1,8 @@
+Content/
+.idea/
+Binaries/
+Intermediate/
+Saved/
+.vs/
+.vsconfig
+*.uasset
