@@ -17,7 +17,6 @@ ADynamicSky::ADynamicSky()
 
 	SunDirectionalLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("SunDirectionalLight"));
 	SunDirectionalLight->SetupAttachment(RootComponent);
-	// SunDirectionalLight->SetRelativeRotation(FRotator(-75, 0, 0));
 	SunDirectionalLight->SetForwardShadingPriority(1);
 
 	MoonDirectionalLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("MoonDirectionalLight"));
@@ -55,6 +54,7 @@ ADynamicSky::ADynamicSky()
 	NightTimeMultiScatteringFactor = 0.5;
 	GroundAlbedo = FColor(0.08, 0.15, 0.61);
 	bIsStarVisibleAtNight = true;
+	bIsMoonVisibleAtNight = true;
 }
 
 void ADynamicSky::OnConstruction(const FTransform& Transform)
@@ -111,7 +111,8 @@ void ADynamicSky::HandleNightSettings() const
 		SkyAtmosphere->SetMultiScatteringFactor(NightTimeMultiScatteringFactor);
 		SkyAtmosphere->SetGroundAlbedo(GroundAlbedo);
 
-		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsStarVisible"), bIsStarVisibleAtNight ? 1 : 0);
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), bIsMoonVisibleAtNight ? 1 : 0);
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), bIsMoonVisibleAtNight ? 1 : 0);
 	}
 
 	else
@@ -119,8 +120,9 @@ void ADynamicSky::HandleNightSettings() const
 		// need to reset value, since SkyAtmosphere is also used in daytime
 		SkyAtmosphere->SetRayleighScattering(FLinearColor(0.175287, 0.409607, 1.0));
 		SkyAtmosphere->SetMultiScatteringFactor(1);
-		
+
 		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsStarVisible"), 0);
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), 0);
 	}
 }
 
@@ -128,7 +130,7 @@ void ADynamicSky::HandleDynamicMaterial()
 {
 	if (DynamicSkyMaterialTemplate)
 	{
-		SkySphereMaterialInstance = UMaterialInstanceDynamic::Create(DynamicSkyMaterialTemplate,this);
+		SkySphereMaterialInstance = UMaterialInstanceDynamic::Create(DynamicSkyMaterialTemplate, this);
 		SkySphere->SetMaterial(0, SkySphereMaterialInstance);
 	}
 }

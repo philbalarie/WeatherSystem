@@ -63,7 +63,7 @@ private:
 
 	UFUNCTION(Category = "01-BasicSettings")
 	void HandleVisibility() const;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "01-BasicSettings")
 	TObjectPtr<UMaterialInterface> DynamicSkyMaterialTemplate;
 
@@ -96,13 +96,16 @@ private:
 	// Control the color of the horizon.
 	UPROPERTY(EditAnywhere, Category = "02-NightSettings")
 	FColor GroundAlbedo;
-	
+
 	UFUNCTION(Category = "02-NightSettings")
 	void HandleNightSettings() const;
 
 	UFUNCTION()
 	void HandleDynamicMaterial();
-	
+
 	UPROPERTY(EditAnywhere, Category = "02-NightSettings")
 	bool bIsStarVisibleAtNight;
+
+	UPROPERTY(EditAnywhere, Category = "03-MoonSettings")
+	bool bIsMoonVisibleAtNight;
 };
