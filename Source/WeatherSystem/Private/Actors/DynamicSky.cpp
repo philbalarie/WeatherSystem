@@ -24,7 +24,7 @@ ADynamicSky::ADynamicSky()
 	MoonDirectionalLight->SetupAttachment(RootComponent);
 	MoonDirectionalLight->SetIntensity(1);
 	MoonDirectionalLight->SetUseTemperature(true);
-	
+
 	SkyAtmosphere = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("SkyAtmosphere"));
 	SkyAtmosphere->SetupAttachment(RootComponent);
 
@@ -39,6 +39,10 @@ ADynamicSky::ADynamicSky()
 	PostProcess->SetupAttachment(RootComponent);
 	// Exposure set in blueprint to prevent auto exposure
 
+	// Should use SM_SkySphere with a custom material to remove mesh visual
+	SkySphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SkySphere"));
+	SkySphere->SetupAttachment(RootComponent);
+
 	// Initialize variables
 	TimeOfDay = 9.f;
 	DawnTime = 6;
@@ -50,12 +54,14 @@ ADynamicSky::ADynamicSky()
 	NightTimeRayleighScattering = FLinearColor(0.15, 0.16, 0.57);
 	NightTimeMultiScatteringFactor = 0.5;
 	GroundAlbedo = FColor(0.08, 0.15, 0.61);
+	bIsStarVisibleAtNight = true;
 }
 
 void ADynamicSky::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	
+
+	HandleDynamicMaterial();
 	HandleSunMoonRotation();
 	HandleVisibility();
 	HandleNightSettings();
@@ -65,15 +71,18 @@ void ADynamicSky::HandleSunMoonRotation()
 {
 	// Handle sun rotation between dawn and dusk
 	// Convert Time of day in degrees for directional light
-	const double SunRotationBasedOnTime = FMath::GetMappedRangeValueUnclamped(FVector2d(DawnTime, DuskTime), FVector2d(0, -180), TimeOfDay);
+	const double SunRotationBasedOnTime = FMath::GetMappedRangeValueUnclamped(
+		FVector2d(DawnTime, DuskTime), FVector2d(0, -180), TimeOfDay);
 	SunDirectionalLight->SetWorldRotation(FRotator(SunRotationBasedOnTime, 0, 0));
 
 	// Handle moon rotation after dusk
-	const double DuskToMidnightRotationBasedOnTime = FMath::GetMappedRangeValueUnclamped(FVector2d(DuskTime + 0.3, 24), FVector2d(-180, -90), TimeOfDay);
+	const double DuskToMidnightRotationBasedOnTime = FMath::GetMappedRangeValueUnclamped(
+		FVector2d(DuskTime + 0.3, 24), FVector2d(-180, -90), TimeOfDay);
 	MoonDirectionalLight->SetWorldRotation(FRotator(DuskToMidnightRotationBasedOnTime, 0, 0));
 
 	// Handle moon rotation before dawn
-	const double MidnightToDawnBasedOnTime = FMath::GetMappedRangeValueUnclamped(FVector2d(0, DawnTime - 0.3), FVector2d(-90, 0), TimeOfDay);
+	const double MidnightToDawnBasedOnTime = FMath::GetMappedRangeValueUnclamped(
+		FVector2d(0, DawnTime - 0.3), FVector2d(-90, 0), TimeOfDay);
 	MoonDirectionalLight->SetWorldRotation(FRotator(MidnightToDawnBasedOnTime, 0, 0));
 }
 
@@ -94,23 +103,15 @@ void ADynamicSky::HandleNightSettings() const
 	{
 		// Control quantity of light
 		MoonDirectionalLight->SetIntensity(MoonLightIntensity);
-		
 		MoonDirectionalLight->SetLightColor(MoonLightColor);
-
-		// Control the size of light disc
 		MoonDirectionalLight->SetLightSourceAngle(MoonLightSourceAngle);
-
-		// Bigger the value, colder the colors
 		MoonDirectionalLight->SetTemperature(MoonLightTemperature);
 
-		// Control the tint of sky atmosphere
 		SkyAtmosphere->SetRayleighScattering(NightTimeRayleighScattering);
-
-		// Control intensity of light scattering in the level. Lowering it decrease slightly the brightness of the scene
 		SkyAtmosphere->SetMultiScatteringFactor(NightTimeMultiScatteringFactor);
-
-		// Control the color of the horizon. Could be similar to RayleighScattering
 		SkyAtmosphere->SetGroundAlbedo(GroundAlbedo);
+
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsStarVisible"), bIsStarVisibleAtNight ? 1 : 0);
 	}
 
 	else
@@ -118,5 +119,16 @@ void ADynamicSky::HandleNightSettings() const
 		// need to reset value, since SkyAtmosphere is also used in daytime
 		SkyAtmosphere->SetRayleighScattering(FLinearColor(0.175287, 0.409607, 1.0));
 		SkyAtmosphere->SetMultiScatteringFactor(1);
+		
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsStarVisible"), 0);
+	}
+}
+
+void ADynamicSky::HandleDynamicMaterial()
+{
+	if (DynamicSkyMaterialTemplate)
+	{
+		SkySphereMaterialInstance = UMaterialInstanceDynamic::Create(DynamicSkyMaterialTemplate,this);
+		SkySphere->SetMaterial(0, SkySphereMaterialInstance);
 	}
 }

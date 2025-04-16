@@ -40,6 +40,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UPostProcessComponent> PostProcess;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UStaticMeshComponent> SkySphere;
+
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, Category = "01-BasicSettings", meta=(UIMin ="0", UIMax ="24"))
@@ -60,6 +63,12 @@ private:
 
 	UFUNCTION(Category = "01-BasicSettings")
 	void HandleVisibility() const;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "01-BasicSettings")
+	TObjectPtr<UMaterialInterface> DynamicSkyMaterialTemplate;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> SkySphereMaterialInstance;
 
 	// Control quantity of light
 	UPROPERTY(EditAnywhere, Category = "02-NightSettings")
@@ -90,4 +99,10 @@ private:
 	
 	UFUNCTION(Category = "02-NightSettings")
 	void HandleNightSettings() const;
+
+	UFUNCTION()
+	void HandleDynamicMaterial();
+	
+	UPROPERTY(EditAnywhere, Category = "02-NightSettings")
+	bool bIsStarVisibleAtNight;
 };

@@ -1,4 +1,7 @@
-Content/
+!/Content/
+/Content/**
+!/Content/Materials/
+
 .idea/
 Binaries/
 Intermediate/
@@ -6,3 +9,5 @@ Saved/
 .vs/
 .vsconfig
 *.uasset
+
+
