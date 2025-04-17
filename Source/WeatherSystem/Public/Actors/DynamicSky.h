@@ -6,6 +6,13 @@
 
 class UPostProcessComponent;
 
+UENUM()
+enum class ECloudMode : uint8
+{
+	None UMETA(DisplayName = "None"),
+	TwoDClouds UMETA(DisplayName = "2D-Clouds"),
+};
+
 UCLASS()
 class WEATHERSYSTEM_API ADynamicSky : public AActor
 {
@@ -108,4 +115,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "03-MoonSettings")
 	bool bIsMoonVisibleAtNight;
+
+	UPROPERTY(EditAnywhere, Category = "04-CloudsSettings")
+	ECloudMode CurrentCloudMode;
+
+	UFUNCTION(Category = "04-CloudsSettings")
+	void HandleCloudsSettings() const;
+	
 };

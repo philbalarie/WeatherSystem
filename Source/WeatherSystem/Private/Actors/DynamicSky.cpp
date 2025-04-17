@@ -55,6 +55,7 @@ ADynamicSky::ADynamicSky()
 	GroundAlbedo = FColor(0.08, 0.15, 0.61);
 	bIsStarVisibleAtNight = true;
 	bIsMoonVisibleAtNight = true;
+	CurrentCloudMode = ECloudMode::TwoDClouds;
 }
 
 void ADynamicSky::OnConstruction(const FTransform& Transform)
@@ -65,6 +66,7 @@ void ADynamicSky::OnConstruction(const FTransform& Transform)
 	HandleSunMoonRotation();
 	HandleVisibility();
 	HandleNightSettings();
+	HandleCloudsSettings();
 }
 
 void ADynamicSky::HandleSunMoonRotation()
@@ -113,6 +115,10 @@ void ADynamicSky::HandleNightSettings() const
 
 		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), bIsMoonVisibleAtNight ? 1 : 0);
 		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), bIsMoonVisibleAtNight ? 1 : 0);
+
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), bIsMoonVisibleAtNight ? 1 : 0);
+
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("CloudBrightness"), 0.1);
 	}
 
 	else
@@ -123,6 +129,8 @@ void ADynamicSky::HandleNightSettings() const
 
 		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsStarVisible"), 0);
 		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("IsMoonVisible"), 0);
+
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("CloudBrightness"), 0.9);
 	}
 }
 
@@ -132,5 +140,18 @@ void ADynamicSky::HandleDynamicMaterial()
 	{
 		SkySphereMaterialInstance = UMaterialInstanceDynamic::Create(DynamicSkyMaterialTemplate, this);
 		SkySphere->SetMaterial(0, SkySphereMaterialInstance);
+	}
+}
+
+void ADynamicSky::HandleCloudsSettings() const
+{
+	switch (CurrentCloudMode)
+	{
+	case ECloudMode::None:
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("Is2DCloudVisible"), 0);
+		break;
+	case ECloudMode::TwoDClouds:
+		SkySphereMaterialInstance->SetScalarParameterValue(TEXT("Is2DCloudVisible"), 1);
+		break;
 	}
 }
