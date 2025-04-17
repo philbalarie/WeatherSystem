@@ -1,11 +1,9 @@
-!/Content/
-/Content/**
-!/Content/Materials/
-
+Content/__ExternalActors__/
+Content/__ExternalObjects__/
+Content/ThirdPerson/
 .idea/
 Binaries/
 Intermediate/
 Saved/
 .vs/
 .vsconfig
-*.uasset
